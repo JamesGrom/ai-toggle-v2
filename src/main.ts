@@ -70,15 +70,6 @@ ipcMain.on("snapshot:capture", () => {
 
 ipcMain.on("snapshot:getSources", () => {
 	desktopCapturer.getSources({ types: ["screen", "window"] }).then((sources) => {
-		// const availableSources = sources.map((source) => {
-		// 	return {
-		// 		label: source.name,
-		// 		index: source.id,
-		// 		// click: () => {
-		// 		// 	console.log(source);
-		// 		// },
-		// 	};
-		// });
 		mainWindow?.webContents?.send("snapshot:availableSources", sources);
 	});
 });

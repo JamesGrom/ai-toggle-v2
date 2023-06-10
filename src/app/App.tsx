@@ -10,7 +10,17 @@ const Home: FC<any> = ({ ...props }) => {
 	const canvasRef = useRef<null | HTMLCanvasElement>(null);
 	const imageFramePreviewRef = useRef<null | HTMLImageElement>(null);
 	const activeStreamRef = useRef<null | MediaStream>(null);
+	const [canvasSize, setCanvasSize] = useState<{ width: number; height: number }>({
+		width: 0,
+		height: 0,
+	});
 
+	const updateCanvasSize = () => {
+		if (canvasRef?.current != null && videoRef?.current != null) {
+			// set canvas size to video size
+			setCanvasSize({ width: videoRef.current.videoWidth, height: videoRef.current.videoHeight });
+		}
+	};
 	useEffect(() => {
 		ipcRenderer.on("snapshot:captured", (event: any) => {
 			console.log(`app.tsx recieved a captured snapshot with following event payload ${event}`);
@@ -41,31 +51,29 @@ const Home: FC<any> = ({ ...props }) => {
 					}
 				});
 		});
+		videoRef.current.addEventListener("loadedmetadata", () => {
+			updateCanvasSize();
+		});
 	}, []);
 	const grabAndPreviewFrame = () => {
 		if (canvasRef?.current != null && videoRef?.current != null) {
 			const context = canvasRef.current.getContext("2d");
-			context.drawImage(
-				videoRef.current,
-				0,
-				0,
-				videoRef.current.videoWidth,
-				videoRef.current.videoHeight
-			);
+			context.drawImage(videoRef.current, 0, 0, canvasSize.width, canvasSize.height);
+			// const dataURL = canvasRef.current.toDataURL("image/jpeg");
+			// ipcRenderer.send("snapshot:save", dataURL);
 			// log video dimensions
-			console.log(
-				`video dimensions: ${videoRef.current.videoWidth}x${videoRef.current.videoHeight}`
-			);
-			console.log(`canvas dimensions: ${canvasRef.current.width}x${canvasRef.current.height}`);
-			console.log(
-				`imageFramePreviewRef dimensions: ${imageFramePreviewRef.current.width}x${imageFramePreviewRef.current.height}`
-			);
-			//save image to file
-			const dataURL = canvasRef.current.toDataURL("image/png");
-			// save dataURL to filesystem
-			ipcRenderer.send("snapshot:save", dataURL);
-			// set image preview
-			setImageFramePreviewSrc(dataURL);
+			// console.log(
+			// 	`video dimensions: ${videoRef.current.videoWidth}x${videoRef.current.videoHeight}`
+			// );
+			// console.log(`canvas dimensions: ${canvasRef.current.width}x${canvasRef.current.height}`);
+			// console.log(
+			// 	`imageFramePreviewRef dimensions: ${imageFramePreviewRef.current.width}x${imageFramePreviewRef.current.height}`
+			// );
+			// //save image to file
+			// const dataURL = canvasRef.current.toDataURL("image/png");
+			// // save dataURL to filesystem
+			// // set image preview
+			// setImageFramePreviewSrc(dataURL);
 		}
 	};
 	return (
@@ -79,18 +87,14 @@ const Home: FC<any> = ({ ...props }) => {
 			{snapshotSource != null && <div>{JSON.stringify(snapshotSource)}</div>}
 
 			<video ref={videoRef}></video>
-			<canvas
-				ref={canvasRef}
-				width={videoRef?.current?.videoWidth ?? "100%"}
-				height={videoRef?.current?.videoHeight ?? "100%"}
-			></canvas>
+			<canvas ref={canvasRef} width={canvasSize.width} height={canvasSize.height}></canvas>
 			<div>
-				<img
+				{/* <img
 					ref={imageFramePreviewRef}
 					src={imageFramePreviewSrc}
 					width="100%"
 					style={{ objectFit: "cover", width: "100%", height: "100%", objectPosition: "center" }}
-				></img>
+				></img> */}
 			</div>
 			<button
 				onClick={() => {
