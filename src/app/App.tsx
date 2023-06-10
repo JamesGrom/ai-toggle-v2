@@ -1,7 +1,8 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 const Home: FC<any> = ({ ...props }) => {
 	const ipcRenderer = (window as any).ipcRenderer;
 	const [snapshot, setSnapshot] = useState<null | string>(null);
+	const videoRef = useRef<null | HTMLVideoElement>(null);
 	// const [availableSources, setAvailableSources] = useState<null | Electron.DesktopCapturerSource[]>(
 	// 	null
 	// );
@@ -20,6 +21,33 @@ const Home: FC<any> = ({ ...props }) => {
 			// }, "");
 			console.log(`app.tsx recieved the following availableSources: ${JSON.stringify(event)}`);
 			setSnapshotSource((event as Electron.DesktopCapturerSource[])[0]);
+			const constraints: MediaStreamConstraints = {
+				audio: false,
+				video: {
+					// fra
+					// advanced:[{fra}]
+				},
+			};
+			navigator.mediaDevices
+				.getUserMedia({
+					audio: false,
+					video: {
+						mandatory: {
+							chromeMediaSource: "desktop",
+							chromeMediaSourceId: (event as Electron.DesktopCapturerSource[])[0].id,
+							minWidth: 1280,
+							maxWidth: 1280,
+							minHeight: 720,
+							maxHeight: 720,
+						},
+					},
+				} as any)
+				.then((stream) => {
+					if (videoRef?.current != null) {
+						videoRef.current.srcObject = stream;
+						videoRef.current.play();
+					}
+				});
 			// setSnapshot(event);
 		});
 	}, []);
@@ -34,6 +62,7 @@ const Home: FC<any> = ({ ...props }) => {
 			)}
 			{snapshotSource != null && <div>{JSON.stringify(snapshotSource)}</div>}
 
+			<video ref={videoRef}></video>
 			<button
 				onClick={() => {
 					//
