@@ -1,15 +1,15 @@
 import { FC, useEffect, useRef, useState } from "react";
 const Home: FC<any> = ({ ...props }) => {
 	const ipcRenderer = (window as any).ipcRenderer;
+	// useState
 	const [snapshot, setSnapshot] = useState<null | string>(null);
 	const [imageFramePreviewSrc, setImageFramePreviewSrc] = useState<null | string>(null);
+	const [snapshotSource, setSnapshotSource] = useState<null | Electron.DesktopCapturerSource>(null);
+	// useRef
 	const videoRef = useRef<null | HTMLVideoElement>(null);
 	const canvasRef = useRef<null | HTMLCanvasElement>(null);
 	const imageFramePreviewRef = useRef<null | HTMLImageElement>(null);
-	// const [availableSources, setAvailableSources] = useState<null | Electron.DesktopCapturerSource[]>(
-	// 	null
-	// );
-	const [snapshotSource, setSnapshotSource] = useState<null | Electron.DesktopCapturerSource>(null);
+
 	useEffect(() => {
 		ipcRenderer.on("snapshot:captured", (event: any) => {
 			console.log(`app.tsx recieved a captured snapshot with following event payload ${event}`);
@@ -18,13 +18,6 @@ const Home: FC<any> = ({ ...props }) => {
 		ipcRenderer.on("snapshot:availableSources", (event: any) => {
 			console.log(`app.tsx recieved the following availableSources: ${JSON.stringify(event)}`);
 			setSnapshotSource((event as Electron.DesktopCapturerSource[])[0]);
-			const constraints: MediaStreamConstraints = {
-				audio: false,
-				video: {
-					// fra
-					// advanced:[{fra}]
-				},
-			};
 			navigator.mediaDevices
 				.getUserMedia({
 					audio: false,
@@ -47,7 +40,7 @@ const Home: FC<any> = ({ ...props }) => {
 				});
 		});
 	}, []);
-	const drawImageFromVideoToCanvas = () => {
+	const grabAndPreviewFrame = () => {
 		if (canvasRef?.current != null && videoRef?.current != null) {
 			const context = canvasRef.current.getContext("2d");
 			context.drawImage(
@@ -66,7 +59,6 @@ const Home: FC<any> = ({ ...props }) => {
 	return (
 		<div>
 			<h1>⚡ Electron Screen Recorder</h1>
-
 			{snapshot != null && (
 				<div>
 					<img src={snapshot}></img>
@@ -81,7 +73,7 @@ const Home: FC<any> = ({ ...props }) => {
 			</div>
 			<button
 				onClick={() => {
-					//
+					grabAndPreviewFrame();
 				}}
 			>
 				Snapshot
