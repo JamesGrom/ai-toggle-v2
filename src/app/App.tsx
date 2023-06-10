@@ -72,7 +72,12 @@ const Home: FC<any> = ({ ...props }) => {
 			{snapshotSource != null && <div>{JSON.stringify(snapshotSource)}</div>}
 
 			<video ref={videoRef}></video>
-			<canvas ref={canvasRef} width={canvasSize.width} height={canvasSize.height}></canvas>
+			<canvas
+				ref={canvasRef}
+				width={canvasSize.width}
+				height={canvasSize.height}
+				style={{ backgroundColor: "red" }}
+			></canvas>
 
 			<button
 				onClick={() => {
