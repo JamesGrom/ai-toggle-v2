@@ -3,12 +3,10 @@ const Home: FC<any> = ({ ...props }) => {
 	const ipcRenderer = (window as any).ipcRenderer;
 	// useState
 	const [snapshot, setSnapshot] = useState<null | string>(null);
-	const [imageFramePreviewSrc, setImageFramePreviewSrc] = useState<null | string>(null);
 	const [snapshotSource, setSnapshotSource] = useState<null | Electron.DesktopCapturerSource>(null);
 	// useRef
 	const videoRef = useRef<null | HTMLVideoElement>(null);
 	const canvasRef = useRef<null | HTMLCanvasElement>(null);
-	const imageFramePreviewRef = useRef<null | HTMLImageElement>(null);
 	const activeStreamRef = useRef<null | MediaStream>(null);
 	const [canvasSize, setCanvasSize] = useState<{ width: number; height: number }>({
 		width: 0,
@@ -59,21 +57,8 @@ const Home: FC<any> = ({ ...props }) => {
 		if (canvasRef?.current != null && videoRef?.current != null) {
 			const context = canvasRef.current.getContext("2d");
 			context.drawImage(videoRef.current, 0, 0, canvasSize.width, canvasSize.height);
-			// const dataURL = canvasRef.current.toDataURL("image/jpeg");
-			// ipcRenderer.send("snapshot:save", dataURL);
-			// log video dimensions
-			// console.log(
-			// 	`video dimensions: ${videoRef.current.videoWidth}x${videoRef.current.videoHeight}`
-			// );
-			// console.log(`canvas dimensions: ${canvasRef.current.width}x${canvasRef.current.height}`);
-			// console.log(
-			// 	`imageFramePreviewRef dimensions: ${imageFramePreviewRef.current.width}x${imageFramePreviewRef.current.height}`
-			// );
-			// //save image to file
-			// const dataURL = canvasRef.current.toDataURL("image/png");
-			// // save dataURL to filesystem
-			// // set image preview
-			// setImageFramePreviewSrc(dataURL);
+			const dataURL = canvasRef.current.toDataURL("image/jpeg");
+			ipcRenderer.send("snapshot:save", dataURL);
 		}
 	};
 	return (
@@ -88,14 +73,7 @@ const Home: FC<any> = ({ ...props }) => {
 
 			<video ref={videoRef}></video>
 			<canvas ref={canvasRef} width={canvasSize.width} height={canvasSize.height}></canvas>
-			<div>
-				{/* <img
-					ref={imageFramePreviewRef}
-					src={imageFramePreviewSrc}
-					width="100%"
-					style={{ objectFit: "cover", width: "100%", height: "100%", objectPosition: "center" }}
-				></img> */}
-			</div>
+
 			<button
 				onClick={() => {
 					grabAndPreviewFrame();
