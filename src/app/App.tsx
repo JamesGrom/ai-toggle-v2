@@ -9,6 +9,7 @@ const Home: FC<any> = ({ ...props }) => {
 	const videoRef = useRef<null | HTMLVideoElement>(null);
 	const canvasRef = useRef<null | HTMLCanvasElement>(null);
 	const imageFramePreviewRef = useRef<null | HTMLImageElement>(null);
+	const activeStreamRef = useRef<null | MediaStream>(null);
 
 	useEffect(() => {
 		ipcRenderer.on("snapshot:captured", (event: any) => {
@@ -36,6 +37,7 @@ const Home: FC<any> = ({ ...props }) => {
 					if (videoRef?.current != null) {
 						videoRef.current.srcObject = stream;
 						videoRef.current.play();
+						activeStreamRef.current = stream;
 					}
 				});
 		});
@@ -50,8 +52,18 @@ const Home: FC<any> = ({ ...props }) => {
 				videoRef.current.videoWidth,
 				videoRef.current.videoHeight
 			);
+			// log video dimensions
+			console.log(
+				`video dimensions: ${videoRef.current.videoWidth}x${videoRef.current.videoHeight}`
+			);
+			console.log(`canvas dimensions: ${canvasRef.current.width}x${canvasRef.current.height}`);
+			console.log(
+				`imageFramePreviewRef dimensions: ${imageFramePreviewRef.current.width}x${imageFramePreviewRef.current.height}`
+			);
 			//save image to file
 			const dataURL = canvasRef.current.toDataURL("image/png");
+			// save dataURL to filesystem
+			ipcRenderer.send("snapshot:save", dataURL);
 			// set image preview
 			setImageFramePreviewSrc(dataURL);
 		}
@@ -67,9 +79,18 @@ const Home: FC<any> = ({ ...props }) => {
 			{snapshotSource != null && <div>{JSON.stringify(snapshotSource)}</div>}
 
 			<video ref={videoRef}></video>
-			<canvas ref={canvasRef}></canvas>
+			<canvas
+				ref={canvasRef}
+				width={videoRef?.current?.videoWidth ?? "100%"}
+				height={videoRef?.current?.videoHeight ?? "100%"}
+			></canvas>
 			<div>
-				<img ref={imageFramePreviewRef} src={imageFramePreviewSrc}></img>
+				<img
+					ref={imageFramePreviewRef}
+					src={imageFramePreviewSrc}
+					width="100%"
+					style={{ objectFit: "cover", width: "100%", height: "100%", objectPosition: "center" }}
+				></img>
 			</div>
 			<button
 				onClick={() => {
@@ -81,7 +102,18 @@ const Home: FC<any> = ({ ...props }) => {
 			<button id="startBtn" className="button is-primary">
 				Start
 			</button>
-			<button id="stopBtn" className="button is-warning">
+			<button
+				id="stopBtn"
+				className="button is-warning"
+				onClick={() => {
+					// stop video stream
+					if (activeStreamRef?.current != null) {
+						activeStreamRef.current.getTracks().forEach((track) => {
+							track.stop();
+						});
+					}
+				}}
+			>
 				Stop
 			</button>
 
