@@ -35,9 +35,8 @@ const Home: FC<any> = ({ ...props }) => {
 							chromeMediaSource: "desktop",
 							chromeMediaSourceId: (event as Electron.DesktopCapturerSource[])[0].id,
 							minWidth: 1280,
-							maxWidth: 1280,
 							minHeight: 720,
-							maxHeight: 720,
+							maxFrameRate: 1,
 						},
 					},
 				} as any)
@@ -57,7 +56,7 @@ const Home: FC<any> = ({ ...props }) => {
 		if (canvasRef?.current != null && videoRef?.current != null) {
 			const context = canvasRef.current.getContext("2d");
 			context.drawImage(videoRef.current, 0, 0, canvasSize.width, canvasSize.height);
-			const dataURL = canvasRef.current.toDataURL("image/jpeg");
+			const dataURL = canvasRef.current.toDataURL("image/png");
 			ipcRenderer.send("snapshot:save", dataURL);
 		}
 	};
@@ -110,7 +109,6 @@ const Home: FC<any> = ({ ...props }) => {
 				id="videoSelectBtn"
 				className="button is-text"
 				onClick={() => {
-					//
 					ipcRenderer.send("snapshot:getSources");
 				}}
 			>

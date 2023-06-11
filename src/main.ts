@@ -77,6 +77,5 @@ ipcMain.on("snapshot:getSources", () => {
 ipcMain.on("snapshot:save", (event, data) => {
 	console.log("snapshot:save called");
 	console.log(data);
-	// save image to file and overwrite file if it already exists
-	// writeFileSync("test.png", data, { flag: "w" });
+	// save image to file
 });
