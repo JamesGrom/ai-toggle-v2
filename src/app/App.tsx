@@ -1,4 +1,5 @@
 import { FC, useEffect, useRef, useState } from "react";
+import { createWorker } from "tesseract.js";
 const Home: FC<any> = ({ ...props }) => {
 	const ipcRenderer = (window as any).ipcRenderer;
 	// useState
@@ -12,6 +13,7 @@ const Home: FC<any> = ({ ...props }) => {
 		width: 0,
 		height: 0,
 	});
+	let tesseractWorker: null | Tesseract.Worker = null;
 
 	const updateCanvasSize = () => {
 		if (canvasRef?.current != null && videoRef?.current != null) {
@@ -110,6 +112,16 @@ const Home: FC<any> = ({ ...props }) => {
 				className="button is-text"
 				onClick={() => {
 					ipcRenderer.send("snapshot:getSources");
+					const initTesseract = async () => {
+						tesseractWorker = await createWorker({
+							workerPath: "./node_modules/tesseract.js/dist/worker.min.js",
+							workerBlobURL: false,
+							logger: (m) => console.log(m),
+						});
+						// await tesseractWorker.loadLanguage("eng");
+						// await tesseractWorker.initialize("eng");
+					};
+					initTesseract();
 				}}
 			>
 				Choose Video Source
