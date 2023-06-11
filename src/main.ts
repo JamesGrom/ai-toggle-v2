@@ -92,11 +92,11 @@ ipcMain.on("ocr", async (event, data) => {
 	// 	// await tesseractWorker.initialize("eng");
 	// };
 	// initTesseract();
+	console.log(`dirname`, __dirname);
 	// Tesseract.recognize(data, "eng", {
-	// 	// workerPath: "",
 	// 	workerPath: "./node_modules/tesseract.js/dist/worker.min.js",
-	// 	langPath: "https://tessdata.projectnaptha.com/4.0.0",
-	// 	corePath: "https://cdn.jsdelivr.net/npm/tesseract.js-core@v4.0.3",
+	// 	// langPath: "https://tessdata.projectnaptha.com/4.0.0",
+	// 	// corePath: "https://cdn.jsdelivr.net/npm/tesseract.js-core@v4.0.3",
 	// });
 	// Tesseract.recognize(data, "eng", {
 	// 	logger: (m) => console.log(m),
